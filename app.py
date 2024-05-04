@@ -1,12 +1,9 @@
 import praw
-from random import randint
 from time import sleep
 from fake_useragent import UserAgent
 from praw.exceptions import RedditAPIException
-from threading import Thread
 from llm.main import create_response    
-from config import Config
-
+from config import Config, Botconfig
 
 def write_log(data):
     with open("log.txt","a") as log:
@@ -55,11 +52,13 @@ class RedditBot:
         return trending_topics
 
     def extract_text_title(self, submission: praw.models.Submission) -> str:
-       
+        
+        write_log(submission.title)
         return submission.title
 
     def extract_text_content(self, submission: praw.models.Submission) -> str:
        
+        write_log(submission.selftext)
         return submission.selftext
 
     def extract_comment_content_and_upvotes(
@@ -103,7 +102,10 @@ class RedditBot:
         
         new_prompt = str(prompt)
         
-        comment = create_response(post=new_prompt)
+        if Botconfig.type == "karma":
+            comment = create_response(post=new_prompt)
+        else:
+            comment = Botconfig.ad
         exit = False
         while not exit:
             try:
@@ -129,11 +131,28 @@ class RedditBot:
         write_log(f"Replied to '{submission.title}' with '{comment}'")
         self.log_commented_post(submission.id)
         print("going to sleep for 10 mins")
-        write_log("going to sleep")
-        sleep(600)
+        write_log("going to sleep 10 mins")
+        sleep(60)
+        write_log("9 more minutes left")
+        sleep(60)
+        write_log("8 more minutes left")
+        sleep(60)
+        write_log("7 more minutes left")
+        sleep(60)
+        write_log("6 more minutes left")
+        sleep(60)
+        write_log("5 more minutes left")
+        sleep(60)
+        write_log("4 more minutes left")
+        sleep(60)
+        write_log("3 more minutes left")
+        sleep(60)
+        write_log("2 more minutes left")
+        sleep(60)
+        write_log("1 more minutes left")
+        sleep(60)
         print("sleep completed posting new comments")
         write_log("sleep completed posting new comments")
-
 
     def load_commented_posts(self) -> list[str]:
        

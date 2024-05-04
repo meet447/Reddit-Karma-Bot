@@ -17,6 +17,8 @@ To run the farmer with a web interface locally, follow these steps:
 
 1. Navigate to the project directory.
 2. Run the `index.py` file.
+3. Go to the /start_bot route to start the start_bot
+4. Go to the /log page to see the logs
 
 ```bash
 python index.py

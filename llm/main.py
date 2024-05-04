@@ -3,7 +3,9 @@ from g4f.client import Client
 import g4f
 import g4f.providers
 
-client = Client(
+def create_response(post):
+    
+    client = Client(
             provider=g4f.Provider.RetryProvider([
                 g4f.Provider.Acytoo,
                 g4f.Provider.You,
@@ -21,18 +23,19 @@ client = Client(
                 g4f.Provider.ChatgptFree,
             ])
         )
-
-
-def create_response(post):
     
     chat_completion = client.chat.completions.create(
                 model=g4f.models.default,
                 messages=[{"role": "user", "content": post}],
-                stream=False
+                stream=True
             )
     
+    response = ""
     
-    response = chat_completion.choices[0].message.content
+    for completion in chat_completion:
+        data = completion.choices[0].delta.content or ""
+        response =  response + data
+         
     return response
 
         

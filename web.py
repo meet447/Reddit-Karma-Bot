@@ -14,15 +14,7 @@ def index():
 def start_bot():
     thread = Thread(target=reddit_bot.run)
     thread.start()
-    return 'Reddit Bot started successfully!'
-
-@app.route('/stop_bot')
-def stop_bot():
-    if reddit_bot.is_running():
-        reddit_bot.stop()
-        return 'Reddit Bot stopped successfully!'
-    else:
-        return 'Reddit Bot is not running.'
+    return 'Reddit Bot started successfully! checks the log at /log'
 
 @app.route('/log')
 def log():
