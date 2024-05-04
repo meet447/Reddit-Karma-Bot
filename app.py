@@ -4,15 +4,37 @@ from fake_useragent import UserAgent
 from praw.exceptions import RedditAPIException
 from llm.main import create_response    
 from config import Config, Botconfig
+import random, requests
 
 def write_log(data):
-    with open("log.txt","a") as log:
-        log.write(data)
-        log.write("\n")
-        log.write('---------------------------')
-        log.write("\n")
-        
+    if Botconfig.discord_webhook == True:
+        try:
+            url = Botconfig.webhook
+            payload = {
+            "embeds": [
+                {
+                    "title": "Reddit log",
+                    "description": data,
+                    "color": 16711680  
+                }
+                ]
+            }
 
+            response = requests.post(url, json=payload)
+            
+            print(response)
+    
+        except:
+            print("INVADLID WEBHOOK")
+            
+    else:
+        with open("log.txt","a") as log:
+            log.write(data)
+            log.write("\n")
+            log.write('---------------------------')
+            log.write("\n")
+        
+#REDDIT BOT CODE
 class RedditBot:
     def __init__(
         self,
@@ -36,11 +58,11 @@ class RedditBot:
     def login(self) -> None:
       
         if self.reddit.user.me() is None:
-            print("Failed to log in")
-            write_log("Failed to log in")
+            print("[LOGIN] - Failed to log in")
+            write_log("[LOGIN] - Failed to log in")
         else:
-            print("Logged in as {}".format(self.reddit.user.me()))
-            write_log("Logged in as {}".format(self.reddit.user.me()))
+            print("[LOGIN] - Logged in as {}".format(self.reddit.user.me()))
+            write_log("[LOGIN] - Logged in as {}".format(self.reddit.user.me()))
 
     def get_trending_topics(self) -> list[praw.models.Submission]:
       
@@ -92,7 +114,7 @@ class RedditBot:
         prompt =[
             {
                 "role": "system",
-                "content": "You are an avid reddit user that knows how to provide simple and short interesting comments that will get upvotes. Now I'll provide you the contents of the post and the most important comments and you will have to generate a comment that will get tons of upvotes, it is important that you integrate with the group, mimic their tone and align your opinions to theirs to be upvoted, your way to respond should be similar to the other comments.Only Generate the response as redditor, do not generate anything extra do not use #tags do got genrate comment in "",only generate the comment in response as "
+                "content": "You are an avid reddit user that knows how to provide simple and short interesting comments that will get upvotes. Now I'll provide you the contents of the post and the most important comments and you will have to generate a comment that will get tons of upvotes, it is important that you integrate with the group, mimic their tone and align your opinions to theirs to be upvoted, your way to respond should be similar to the other comments.",
             },
             {
                 "role": "user",
@@ -105,19 +127,40 @@ class RedditBot:
         if Botconfig.type == "karma":
             comment = create_response(post=new_prompt)
         else:
-            comment = Botconfig.ad
+            comment = random.choice(Botconfig.ads)
         exit = False
         while not exit:
             try:
                 submission.reply(comment)
-                print("replied to tthe post!")
-                write_log("replied to the post")
+                print("[SUCCESS] - replied to the post!")
+                write_log("[SUCCESS] - replied to the post")
                 exit = True
             except RedditAPIException as e:
                 if e.error_type == "RATELIMIT":
-                    print("rate limited sleeping 10 mins")
-                    write_log("rate limited sleeping for 10 mins")
-                    sleep(600)
+                    print("[RATE LIMIT] - rate limited sleeping 10 mins")
+                    write_log("[RATE LIMIT] - rate limited sleeping for 10 mins")
+                    sleep(60)
+                    write_log("[SLEEP] - 9 more minutes left")
+                    sleep(60)
+                    write_log("[SLEEP] - 8 more minutes left")
+                    sleep(60)
+                    write_log("[SLEEP] - 7 more minutes left")
+                    sleep(60)
+                    write_log("[SLEEP] - 6 more minutes left")
+                    sleep(60)
+                    write_log("[SLEEP] - 5 more minutes left")
+                    sleep(60)
+                    write_log("[SLEEP] - 4 more minutes left")
+                    sleep(60)
+                    write_log("[SLEEP] - 3 more minutes left")
+                    sleep(60)
+                    write_log("[SLEEP] - 2 more minutes left")
+                    sleep(60)
+                    write_log("[SLEEP] - 1 more minutes left")
+                    sleep(60)
+                    print("[SLEEP] - sleep completed posting new comments")
+                    write_log("[SLEEP] - sleep completed posting new comments")
+                    
                 elif e.error_type == "THREAD_LOCKED":
                     print("Thread locked. Skipping.")
                     write_log("thread locked skipping")
@@ -129,30 +172,32 @@ class RedditBot:
 
         print(f"Replied to '{submission.title}' with '{comment}'")
         write_log(f"Replied to '{submission.title}' with '{comment}'")
+        
         self.log_commented_post(submission.id)
-        print("going to sleep for 10 mins")
-        write_log("going to sleep 10 mins")
+        
+        print("[SLEEP] - going to sleep for 10 mins")
+        write_log("[SLEEP] - going to sleep 10 mins")
         sleep(60)
-        write_log("9 more minutes left")
+        write_log("[SLEEP] - 9 more minutes left")
         sleep(60)
-        write_log("8 more minutes left")
+        write_log("[SLEEP] - 8 more minutes left")
         sleep(60)
-        write_log("7 more minutes left")
+        write_log("[SLEEP] - 7 more minutes left")
         sleep(60)
-        write_log("6 more minutes left")
+        write_log("[SLEEP] - 6 more minutes left")
         sleep(60)
-        write_log("5 more minutes left")
+        write_log("[SLEEP] - 5 more minutes left")
         sleep(60)
-        write_log("4 more minutes left")
+        write_log("[SLEEP] - 4 more minutes left")
         sleep(60)
-        write_log("3 more minutes left")
+        write_log("[SLEEP] - 3 more minutes left")
         sleep(60)
-        write_log("2 more minutes left")
+        write_log("[SLEEP] - 2 more minutes left")
         sleep(60)
-        write_log("1 more minutes left")
+        write_log("[SLEEP] - 1 more minutes left")
         sleep(60)
-        print("sleep completed posting new comments")
-        write_log("sleep completed posting new comments")
+        print("[SLEEP] - sleep completed posting new comments")
+        write_log("[SLEEP] - sleep completed posting new comments")
 
     def load_commented_posts(self) -> list[str]:
        
