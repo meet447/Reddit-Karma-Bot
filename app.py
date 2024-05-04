@@ -3,10 +3,18 @@ from random import randint
 from time import sleep
 from fake_useragent import UserAgent
 from praw.exceptions import RedditAPIException
-from model.main import get_comments
 from threading import Thread
+from llm.main import create_response    
 from config import Config
-    
+
+
+def write_log(data):
+    with open("log.txt","a") as log:
+        log.write(data)
+        log.write("\n")
+        log.write('---------------------------')
+        log.write("\n")
+        
 
 class RedditBot:
     def __init__(
@@ -32,8 +40,10 @@ class RedditBot:
       
         if self.reddit.user.me() is None:
             print("Failed to log in")
+            write_log("Failed to log in")
         else:
-            print("[SUCCESS] Logged in as {}".format(self.reddit.user.me()))
+            print("Logged in as {}".format(self.reddit.user.me()))
+            write_log("Logged in as {}".format(self.reddit.user.me()))
 
     def get_trending_topics(self) -> list[praw.models.Submission]:
       
@@ -93,29 +103,36 @@ class RedditBot:
         
         new_prompt = str(prompt)
         
-        comment = get_comments(prompt=new_prompt)
+        comment = create_response(post=new_prompt)
         exit = False
         while not exit:
             try:
                 submission.reply(comment)
-                print("[SUCCESS] Replied to the post!!")
+                print("replied to tthe post!")
+                write_log("replied to the post")
                 exit = True
             except RedditAPIException as e:
                 if e.error_type == "RATELIMIT":
-                    print("Rate limited sleeping 10 mins")
+                    print("rate limited sleeping 10 mins")
+                    write_log("rate limited sleeping for 10 mins")
                     sleep(600)
                 elif e.error_type == "THREAD_LOCKED":
                     print("Thread locked. Skipping.")
+                    write_log("thread locked skipping")
                     exit = True
                 else:
                     print(e.error_type)
+                    write_log(e.error_type)
                     exit = True
 
-        print(f"[SUCCESS] Replied to '{submission.title}' with '{comment}'")
+        print(f"Replied to '{submission.title}' with '{comment}'")
+        write_log(f"Replied to '{submission.title}' with '{comment}'")
         self.log_commented_post(submission.id)
-        print("[SUCCESS] Going to sleep for 10 mins")
+        print("going to sleep for 10 mins")
+        write_log("going to sleep")
         sleep(600)
-        print("[SUCCESS] sleep completed posting new comments")
+        print("sleep completed posting new comments")
+        write_log("sleep completed posting new comments")
 
 
     def load_commented_posts(self) -> list[str]:
@@ -136,12 +153,15 @@ class RedditBot:
         
         self.login()
         trending_topics = self.get_trending_topics()
-        print("[SUCCESS] fetched a trending topic!")
+        print("fetched a trending topic!")
+        write_log("fetched a trending topic")
         for submission in trending_topics:
             post_title = self.extract_text_title(submission)
-            print("[SUCCESS] recived title")
+            print("recived title")
+            write_log("recived title")
             text_content = self.extract_text_content(submission)
-            print("[SUCCESS] recived content")
+            print("recived content")
+            write_log("received content")
             comment_content_and_upvotes = self.extract_comment_content_and_upvotes(
                 submission
             )
