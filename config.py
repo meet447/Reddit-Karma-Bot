@@ -1,5 +1,5 @@
 class Config:
-    client_id = ""
-    client_secret = ""
-    username = ""
-    password = ""
+    client_id = "gw6249Y4qNRIIwbleU3NtQ"
+    client_secret = "BtfBfGOy5uK1wQlIhwY6clXR46oetA"
+    username = "maouuuw"
+    password = "immeet44"
