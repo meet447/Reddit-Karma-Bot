@@ -13,7 +13,7 @@ def create_response(post):
         request_payload = {
             "key": api_key,
             "prompt": post,
-            "model": "mistralai/mistral-7b-instruct-v0.1",
+            "model": "meta/llama-2-70b-chat",
         }
 
         response = requests.post("https://www.chipling.xyz/api/request", params=request_payload)
