@@ -1,0 +1,11 @@
+# Ignore compiled Python files
+*.pyc
+
+# Ignore log files
+log.txt
+
+# Ignore commented posts text file
+commented_posts.txt
+
+# Ignore config.py
+config.py
