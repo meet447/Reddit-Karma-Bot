@@ -87,17 +87,16 @@ class RedditBot:
         comments = [comment[0] for comment in comments]
         comments = ", ".join(comments)
         
-        prompt =[
-            {
-                "role": "system",
-                "content": "You are an avid reddit user that knows how to provide simple and short interesting comments that will get upvotes. Now I'll provide you the contents of the post and the most important comments and you will have to generate a comment that will get tons of upvotes, it is important that you integrate with the group, mimic their tone and align your opinions to theirs to be upvoted, your way to respond should be similar to the other comments.",
-            },
-            {
-                "role": "user",
-                "content": f"The post of title {title}, its text content is: {post_text}. The most voted comments are: {comments}. Now generate a comment that will fit in and earn upvotes, remember to speak in a similar tone to the other comments, short phrases and simple words are the best don't be too verbose, only one short phrase with natural language mimicking the others and their mood, don't be too simple or too happy and friendly as it looks bad, make yourself look a bit interesting and NEVER EVER BE AGGRESIVE OR OFFENSIVE. Only reply with the comment, the format of your response is quite important so don't reply anything else.",
-            },
-        ],
-        
+        prompt = f'''
+        [SYSTEM] You are an avid Reddit user skilled at crafting concise and engaging comments that resonate with the community and garner significant upvotes. Your task is to generate a comment that seamlessly integrates with the existing discussion, mirroring the tone and sentiment of the most popular comments. Your comment should be succinct yet intriguing, capturing the attention of readers without appearing overly verbose or excessively friendly. Avoid being aggressive or offensive at all costs.
+
+        [CONTENT] The post titled "{title}" contains the following text: "{post_text}". Among the most upvoted comments are: "{comments}". Your objective is to create a comment that aligns with the prevailing mood and opinions expressed in the thread. Keep your response natural and in line with the community's language and attitudes.
+
+        Format your response as a single, short phrase. Example comments may provide helpful guidance in crafting your response. Aim for a balance between simplicity and sophistication to engage readers effectively. 
+
+        [CONTENT]
+        '''
+                
         new_prompt = str(prompt)
         
         if Botconfig.type == "ai":
