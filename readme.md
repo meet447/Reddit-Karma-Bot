@@ -40,17 +40,28 @@ Render and hugging face spaces recommended!
 - Flask (for web interface)
 - chipling ai (optional, for comment generation)
 
+Your updated `config.py` file looks good! It nicely organizes the configuration parameters for your Reddit bot. 
+
 ## Configuration
 
 Ensure to configure the following parameters in the `config.py` file:
 
-- `client_id`: Reddit API client ID
-- `client_secret`: Reddit API client secret
-- `username`: Reddit account username
-- `password`: Reddit account password
-- `webhook`: Discord webhook URL for logging (optional)
-- `discord_webhook`: Boolean indicating whether Discord webhook is enabled (optional)
-- `type`: Comment generation method (e.g., "karma" for using the language model, "ad" for using predefined comments)
+- `client_id`: Your Reddit API client ID.
+- `client_secret`: Your Reddit API client secret.
+- `username`: Your Reddit account username.
+- `password`: Your Reddit account password.
+- `webhook`: (Optional) Discord webhook URL for logging purposes.
+- `discord_webhook`: (Optional) Boolean indicating whether the Discord webhook is enabled.
+- `type`: Select the purpose of your bot. You can choose from:
+  - `"ai"`: For a bot that generates comments using AI.
+  - `"ad"`: For a bot that posts predefined advertisements.
+  - `"post"`: For a bot that makes posts based on predefined titles and bodies.
+- `all_subreddits`: Set to `True` if you want the bot to post in all subreddits, or `False` to only post in specific subreddits listed below.
+- `subreddits`: List of subreddits where the bot will post or comment. If `all_subreddits` is set to `False`, the bot will only interact with these subreddits.
+- `posts`: List of dictionaries containing the titles and bodies of the posts to be made by the bot. Used when `type` is set to `"post"`.
+- `ads`: List of advertisements or messages to be posted by the bot. Used when `type` is set to `"ad"`.
+
+Ensure that you provide valid values for each parameter before running your bot.
 
 ## Usage
 
