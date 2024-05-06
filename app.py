@@ -4,36 +4,10 @@ from fake_useragent import UserAgent
 from praw.exceptions import RedditAPIException
 from llm.main import create_response    
 from config import Config, Botconfig
-import random, requests
+import random
+from modules.sleep.main import goto_sleep
+from modules.logging.main import write_log
 
-def write_log(data):
-    if Botconfig.discord_webhook == True:
-        try:
-            url = Botconfig.webhook
-            payload = {
-            "embeds": [
-                {
-                    "title": "Reddit log",
-                    "description": data,
-                    "color": 16711680  
-                }
-                ]
-            }
-
-            response = requests.post(url, json=payload)
-            
-            print(response)
-    
-        except:
-            print("INVADLID WEBHOOK")
-            
-    else:
-        with open("log.txt","a") as log:
-            log.write(data)
-            log.write("\n")
-            log.write('---------------------------')
-            log.write("\n")
-        
 #REDDIT BOT CODE
 class RedditBot:
     def __init__(
@@ -68,9 +42,11 @@ class RedditBot:
       
         trending_topics = []
         commented_posts = self.load_commented_posts()
+        
         for submission in self.reddit.subreddit("all").hot(limit=500):
             if submission.id not in commented_posts:
                 trending_topics.append(submission)
+
         return trending_topics
 
     def extract_text_title(self, submission: praw.models.Submission) -> str:
@@ -124,7 +100,7 @@ class RedditBot:
         
         new_prompt = str(prompt)
         
-        if Botconfig.type == "karma":
+        if Botconfig.type == "ai":
             comment = create_response(post=new_prompt)
         else:
             comment = random.choice(Botconfig.ads)
@@ -139,25 +115,7 @@ class RedditBot:
                 if e.error_type == "RATELIMIT":
                     print("[RATE LIMIT] - rate limited sleeping 10 mins")
                     write_log("[RATE LIMIT] - rate limited sleeping for 10 mins")
-                    sleep(60)
-                    write_log("[SLEEP] - 9 more minutes left")
-                    sleep(60)
-                    write_log("[SLEEP] - 8 more minutes left")
-                    sleep(60)
-                    write_log("[SLEEP] - 7 more minutes left")
-                    sleep(60)
-                    write_log("[SLEEP] - 6 more minutes left")
-                    sleep(60)
-                    write_log("[SLEEP] - 5 more minutes left")
-                    sleep(60)
-                    write_log("[SLEEP] - 4 more minutes left")
-                    sleep(60)
-                    write_log("[SLEEP] - 3 more minutes left")
-                    sleep(60)
-                    write_log("[SLEEP] - 2 more minutes left")
-                    sleep(60)
-                    write_log("[SLEEP] - 1 more minutes left")
-                    sleep(60)
+                    goto_sleep(Botconfig.cooldown)
                     print("[SLEEP] - sleep completed posting new comments")
                     write_log("[SLEEP] - sleep completed posting new comments")
                     
@@ -175,28 +133,7 @@ class RedditBot:
         
         self.log_commented_post(submission.id)
         
-        print("[SLEEP] - going to sleep for 10 mins")
-        write_log("[SLEEP] - going to sleep 10 mins")
-        sleep(60)
-        write_log("[SLEEP] - 9 more minutes left")
-        sleep(60)
-        write_log("[SLEEP] - 8 more minutes left")
-        sleep(60)
-        write_log("[SLEEP] - 7 more minutes left")
-        sleep(60)
-        write_log("[SLEEP] - 6 more minutes left")
-        sleep(60)
-        write_log("[SLEEP] - 5 more minutes left")
-        sleep(60)
-        write_log("[SLEEP] - 4 more minutes left")
-        sleep(60)
-        write_log("[SLEEP] - 3 more minutes left")
-        sleep(60)
-        write_log("[SLEEP] - 2 more minutes left")
-        sleep(60)
-        write_log("[SLEEP] - 1 more minutes left")
-        sleep(60)
-        print("[SLEEP] - sleep completed posting new comments")
+        goto_sleep(Botconfig.cooldown)
         write_log("[SLEEP] - sleep completed posting new comments")
 
     def load_commented_posts(self) -> list[str]:
@@ -216,23 +153,75 @@ class RedditBot:
     def run(self) -> None:
         
         self.login()
-        trending_topics = self.get_trending_topics()
-        print("fetched a trending topic!")
-        write_log("fetched a trending topic")
-        for submission in trending_topics:
-            post_title = self.extract_text_title(submission)
-            print("recived title")
-            write_log("recived title")
-            text_content = self.extract_text_content(submission)
-            print("recived content")
-            write_log("received content")
-            comment_content_and_upvotes = self.extract_comment_content_and_upvotes(
-                submission
-            )
-            
-            self.generate_comment(
-                submission, post_title, text_content, comment_content_and_upvotes
-            )
+        
+        if Botconfig.type == "post":
+            while True:
+                for sub in Botconfig.subreddits:
+                    for post in Botconfig.posts:
+                        try:
+                            title = post["title"]
+                            body = post["body"]
+                            self.reddit.subreddit(sub).submit(title=title, selftext=body)
+                            print("[SUCCESS] - Submission made")
+                            write_log("[SUCCESS] - Submission made")
+                            goto_sleep(Botconfig.cooldown)
+                            
+                        except RedditAPIException as e:
+                            if e.error_type == "RATELIMIT":
+                                print("[RATE LIMIT] - rate limited sleeping 10 mins")
+                                write_log("[RATE LIMIT] - rate limited sleeping for 10 mins")
+                                goto_sleep(Botconfig.cooldown)
+                                print("[SLEEP] - sleep completed posting new comments")
+                                write_log("[SLEEP] - sleep completed posting new comments")
+                                
+                            elif e.error_type == "THREAD_LOCKED":
+                                print("Thread locked. Skipping.")
+                                write_log("thread locked skipping")
+                            else:
+                                print(e.error_type)
+                                write_log(e.error_type)
+        
+        else:
+            if Botconfig.all_subreddits == True:
+                trending_topics = self.get_trending_topics()
+                print("[SUCCESS] - fetched a trending topic!")
+                write_log("SUCCESS] - fetched a trending topic")
+                for submission in trending_topics:
+                    post_title = self.extract_text_title(submission)
+                    print("SUCCESS] - recived title")
+                    write_log("SUCCESS] - recived title")
+                    text_content = self.extract_text_content(submission)
+                    print("SUCCESS] - recived content")
+                    write_log("SUCCESS] - received content")
+                    comment_content_and_upvotes = self.extract_comment_content_and_upvotes(
+                        submission
+                    )
+                    self.generate_comment(
+                        submission, post_title, text_content, comment_content_and_upvotes
+                    )
+            else:
+                while True:
+                    subreddit = random.choice(Botconfig.subreddits)
+                    posts = []
+                    commented_posts = self.load_commented_posts()
+                    for submission in self.reddit.subreddit(subreddit).hot(limit=100):
+                        if submission.id not in commented_posts:
+                            posts.append(submission)
+                                            
+                    post = random.choice(posts)
+                    
+                    post_title = self.extract_text_title(submission)
+                    print("SUCCESS] - recived title")
+                    write_log("SUCCESS] - recived title")
+                    text_content = self.extract_text_content(submission)
+                    print("SUCCESS] - recived content")
+                    write_log("SUCCESS] - received content")
+                    comment_content_and_upvotes = self.extract_comment_content_and_upvotes(
+                            submission
+                    )
+                    self.generate_comment(
+                            submission, post_title, text_content, comment_content_and_upvotes
+                    )
 
 if __name__ == "__main__":
     reddit_bot = RedditBot(Config.client_id, Config.client_secret, Config.username, Config.password)

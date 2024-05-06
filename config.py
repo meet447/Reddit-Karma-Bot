@@ -7,16 +7,20 @@ class Config:
     password = ""
 
 
-#SELECT PURPOSE OF BOT KARMA FARMER OR ADVERTISEMENT (karma/ad)
-
 class Botconfig:
+    
+    #interval between posts or comments in minutes 
+    cooldown = 10 
     
     #SET TO TRUE IF YOU NEED TO SETUP WEBHOOK FOR LOGS
     webhook = ""
     
     discord_webhook = False
+     
+    #SELECT PURPOSE OF BOT KARMA FARMER OR ADVERTISEMENT (ai/ad/post)
+    type = "ai"
     
-    type = "karma"
+    all_subreddits = False
     
     ads = [
         '''
@@ -29,6 +33,16 @@ class Botconfig:
         Advertisement 3: Yet another ad message here!
         ''',
     ]
+    
+    #if set to False will only post in the specific subreddits
+        
+    subreddits = [
+        "test",
+        "gachagaming",
+        "TowerofGod",
+    ]
 
-   
-
+    posts = [
+        {"title":"hey there upvote for a upvote!", "body":"UPVOTE PLEASE"},
+        {"title":"hey there upvote for a upvote 2!", "body":"UPVOTE PLEASE"}
+    ]

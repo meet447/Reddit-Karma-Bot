@@ -21,3 +21,9 @@ def log():
     with open("log.txt") as file:
         data = file.read()
         return data
+    
+@app.route('/commented')
+def commented_posts():
+    with open("commented_posts.txt") as file:
+        data = file.read()
+        return data

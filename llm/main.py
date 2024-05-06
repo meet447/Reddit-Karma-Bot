@@ -35,8 +35,16 @@ def create_response(post):
                     sentence = ""
                     for i in output_url:
                         sentence = sentence + i
-                        
-                    return sentence
+                    
+                    if (sentence.startswith('"') and sentence.endswith('"')) or \
+                        (sentence.startswith("'") and sentence.endswith("'")):
+                            # Remove the enclosing quotes
+                            cleaned_sentence = sentence[1:-1]
+                    else:
+                            # If the string doesn't start and end with quotes, keep it unchanged
+                            cleaned_sentence = sentence    
+                            
+                    return cleaned_sentence
                 else:
                     print(f"API Request Status: {response_data['status']}")
                     time.sleep(2) 
