@@ -50,13 +50,9 @@ class RedditBot:
         return trending_topics
 
     def extract_text_title(self, submission: praw.models.Submission) -> str:
-        
-        write_log(submission.title)
         return submission.title
 
     def extract_text_content(self, submission: praw.models.Submission) -> str:
-       
-        write_log(submission.selftext)
         return submission.selftext
 
     def extract_comment_content_and_upvotes(
@@ -167,8 +163,8 @@ class RedditBot:
                             
                         except RedditAPIException as e:
                             if e.error_type == "RATELIMIT":
-                                print("[RATE LIMIT] - rate limited sleeping 10 mins")
-                                write_log("[RATE LIMIT] - rate limited sleeping for 10 mins")
+                                print("[RATE LIMIT] - rate limited sleeping")
+                                write_log("[RATE LIMIT] - rate limited sleeping")
                                 goto_sleep(Botconfig.cooldown)
                                 print("[SLEEP] - sleep completed posting new comments")
                                 write_log("[SLEEP] - sleep completed posting new comments")
