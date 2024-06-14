@@ -1,14 +1,15 @@
+import os
 import praw
+from requests import Session
 from time import sleep
 from fake_useragent import UserAgent
 from praw.exceptions import RedditAPIException
-from llm.main import create_response    
+from llm.main import create_response
 from config import Config, Botconfig
 import random
 from modules.sleep.main import goto_sleep
 from modules.logging.main import write_log
 
-#REDDIT BOT CODE
 class RedditBot:
     def __init__(
         self,
@@ -18,28 +19,34 @@ class RedditBot:
         password: str = None,
         user_agent: str = None,
         log_file: str = None,
+        proxy: str = None,
     ) -> None:
-        
+        # Set the environment variable for the proxy
+        if proxy:
+            os.environ['HTTPS_PROXY'] = proxy
+
+        # Create a custom session to pass to PRAW
+        session = Session()
+
         self.reddit = praw.Reddit(
             client_id=client_id,
             client_secret=client_secret,
             username=username,
             password=password,
             user_agent=user_agent or UserAgent().random,
+            requestor_kwargs={"session": session}  # pass the custom Session instance
         )
         self.log_file = log_file or "commented_posts.txt"
 
     def login(self) -> None:
-      
-        if self.reddit.user.me() is None:
-            print("[LOGIN] - Failed to log in")
-            write_log("[LOGIN] - Failed to log in")
-        else:
+        try:
             print("[LOGIN] - Logged in as {}".format(self.reddit.user.me()))
             write_log("[LOGIN] - Logged in as {}".format(self.reddit.user.me()))
+        except Exception as e:
+            print("[LOGIN] - Failed to log in: {}".format(e))
+            write_log("[LOGIN] - Failed to log in: {}".format(e))
 
     def get_trending_topics(self) -> list[praw.models.Submission]:
-      
         trending_topics = []
         commented_posts = self.load_commented_posts()
         
@@ -73,8 +80,6 @@ class RedditBot:
         post_text: str,
         comments: list[tuple[str, int]],
     ) -> None:
-      
-        
         comments = sorted(comments, key=lambda comment: comment[1], reverse=True)
         if len(comments) >= 4:
             comments = comments[:4]
@@ -132,7 +137,6 @@ class RedditBot:
         write_log("[SLEEP] - sleep completed posting new comments")
 
     def load_commented_posts(self) -> list[str]:
-       
         try:
             with open(self.log_file, "r") as f:
                 commented_posts = f.read().splitlines()
@@ -141,12 +145,10 @@ class RedditBot:
         return commented_posts
 
     def log_commented_post(self, post_id: str) -> None:
-        
         with open(self.log_file, "a") as f:
             f.write(post_id + "\n")
 
     def run(self) -> None:
-        
         self.login()
         
         if Botconfig.type == "post":
@@ -219,5 +221,6 @@ class RedditBot:
                     )
 
 if __name__ == "__main__":
-    reddit_bot = RedditBot(Config.client_id, Config.client_secret, Config.username, Config.password)
+    proxy = Botconfig.proxy  # Replace with a working proxy
+    reddit_bot = RedditBot(Config.client_id, Config.client_secret, Config.username, Config.password, proxy=proxy)
     reddit_bot.run()

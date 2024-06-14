@@ -6,8 +6,9 @@ class Config:
     username = ""
     password = ""
 
-
 class Botconfig:
+    #HTTP PROXY SUPPORT 
+    proxy = ''
     
     #interval between posts or comments in minutes 
     cooldown = 10 
