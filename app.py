@@ -33,6 +33,8 @@ class RedditBot:
                 proxy_url = f"http://{proxy_username}:{proxy_password}@{ip}:{port}"
                 session.proxies['http'] = proxy_url
                 session.proxies['https'] = proxy_url
+
+                print("using proxy: " + proxy_url)
             else:
                 print("Proxy format is incorrect. Expected format is 'ip:port:username:password'")
 
