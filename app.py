@@ -22,11 +22,19 @@ class RedditBot:
         proxy: str = None,
     ) -> None:
         # Set the environment variable for the proxy
-        if proxy:
-            os.environ['HTTPS_PROXY'] = proxy
-
-        # Create a custom session to pass to PRAW
         session = Session()
+
+        # Configure proxy if provided
+        if proxy:
+            # Assuming proxy is in the format 'ip:port:username:password'
+            proxy_parts = proxy.split(':')
+            if len(proxy_parts) == 4:
+                ip, port, proxy_username, proxy_password = proxy_parts
+                proxy_url = f"http://{proxy_username}:{proxy_password}@{ip}:{port}"
+                session.proxies['http'] = proxy_url
+                session.proxies['https'] = proxy_url
+            else:
+                print("Proxy format is incorrect. Expected format is 'ip:port:username:password'")
 
         self.reddit = praw.Reddit(
             client_id=client_id,
