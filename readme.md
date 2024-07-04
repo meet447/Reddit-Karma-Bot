@@ -23,6 +23,9 @@ To run the farmer with a web interface locally, follow these steps:
 ```bash
 python index.py
 ```
+##Web Dashboard
+![image](https://github.com/meet447/Reddit-Karma-Bot/assets/51074036/2552eb5c-b2ce-42ec-aa5a-154f11435e16)
+
 
 To deploy the farmer on hosting services like Render and more, configure the hosting server to execute `web.py`.
 Render and hugging face spaces recommended!
