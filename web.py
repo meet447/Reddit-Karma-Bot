@@ -1,10 +1,10 @@
 from flask import Flask, render_template, jsonify
 from threading import Thread
-from app import RedditBot
+from app import RedditBot, main
 from config import Config
 
 app = Flask(__name__)
-reddit_bot = RedditBot(Config.client_id, Config.client_secret, Config.username, Config.password)
+reddit_bot = main()
 bot_thread = None
 
 @app.route('/')
@@ -24,7 +24,6 @@ def start_bot():
 @app.route('/stop_bot', methods=['POST'])
 def stop_bot():
     if bot_thread is not None and bot_thread.is_alive():
-        reddit_bot.stop()
         bot_thread.join()
         return jsonify({"status": "success", "message": "Reddit Bot stopped successfully!"})
     else:

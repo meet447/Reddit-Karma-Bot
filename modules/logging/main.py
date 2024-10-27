@@ -6,24 +6,23 @@ def write_log(data):
         try:
             url = Botconfig.webhook
             payload = {
-            "embeds": [
-                {
-                    "title": "Reddit log",
-                    "description": data,
-                    "color": 16711680  
-                }
+                "embeds": [
+                    {
+                        "title": "Reddit log",
+                        "description": data,
+                        "color": 16711680  
+                    }
                 ]
             }
 
             response = requests.post(url, json=payload)
-            
             print(response)
     
         except:
-            print("INVADLID WEBHOOK")
+            print("INVALID WEBHOOK")
             
     else:
-        with open("log.txt","a") as log:
+        with open("log.txt", "a", encoding="utf-8") as log:
             log.write(data)
             log.write("\n")
             log.write('---------------------------')

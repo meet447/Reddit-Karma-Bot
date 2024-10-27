@@ -1,27 +1,44 @@
-#CONFIGURE YOUR REDDIT ACC DETAILS HERE
+import random
 
+# Configure multiple Reddit accounts
 class Config:
-    client_id = ""
-    client_secret = ""
-    username = ""
-    password = ""
+    accounts = [
+        {
+            "client_id": "",
+            "client_secret": "",
+            "username": "",
+            "password": "",
+        },
+        # Add more accounts as needed
+        {
+            "client_id": "AnotherClientID",
+            "client_secret": "AnotherClientSecret",
+            "username": "AnotherUsername",
+            "password": "AnotherPassword",
+        },
+    ]
 
 class Botconfig:
-    #HTTP PROXY SUPPORT 
-    proxy = ''
+    proxies = [
+        "123.45.67.89:8080:user1:pass1",
+        "98.76.54.32:3128:user2:pass2",
+        # Add more proxies as needed
+    ]
     
-    #interval between posts or comments in minutes 
+    new_posts = False
+    
+    # Interval between posts or comments in minutes
     cooldown = 10 
     
-    #SET TO TRUE IF YOU NEED TO SETUP WEBHOOK FOR LOGS
+    # Set to True if you need to setup webhook for logs
     webhook = ""
     
     discord_webhook = False
      
-    #SELECT PURPOSE OF BOT KARMA FARMER OR ADVERTISEMENT (ai/ad/post)
+    # Select purpose of bot: 'ai', 'ad', or 'post'
     type = "ai"
     
-    all_subreddits = False
+    all_subreddits = True
     
     ads = [
         '''
@@ -35,8 +52,7 @@ class Botconfig:
         ''',
     ]
     
-    #if set to False will only post in the specific subreddits
-        
+    # If set to False, will only post in the specific subreddits
     subreddits = [
         "test",
         "gachagaming",
@@ -44,6 +60,14 @@ class Botconfig:
     ]
 
     posts = [
-        {"title":"hey there upvote for a upvote!", "body":"UPVOTE PLEASE"},
-        {"title":"hey there upvote for a upvote 2!", "body":"UPVOTE PLEASE"}
+        {"title": "Hey there, upvote for an upvote!", "body": "UPVOTE PLEASE"},
+        {"title": "Upvote for upvote, part 2!", "body": "UPVOTE PLEASE"}
     ]
+    
+    log_file = "commented_posts.txt"
+
+    @staticmethod
+    def get_random_proxy():
+        if Botconfig.proxies:
+            return random.choice(Botconfig.proxies)
+        return None
