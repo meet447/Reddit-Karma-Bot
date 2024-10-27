@@ -20,8 +20,6 @@ class Config:
 
 class Botconfig:
     proxies = [
-        "123.45.67.89:8080:user1:pass1",
-        "98.76.54.32:3128:user2:pass2",
         # Add more proxies as needed
     ]
     
