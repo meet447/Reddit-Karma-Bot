@@ -107,7 +107,6 @@ class RedditBot:
                     print("[RATE LIMIT] - Rate limited. Sleeping.")
                     write_log("[RATE LIMIT] - Rate limited. Sleeping.")
                     break
-                    
                 elif e.error_type == "THREAD_LOCKED":
                     print("Thread locked. Skipping.")
                     write_log("Thread locked. Skipping.")
@@ -132,33 +131,6 @@ class RedditBot:
         with open(self.log_file, "a") as f:
             f.write(post_id + "\n")
 
-    def run_for_post(self, submission):
-        """Process a single post by logging in with each account and commenting."""
-        title = self.extract_text_title(submission)
-        content = self.extract_text_content(submission)
-        comments = self.extract_comment_content_and_upvotes(submission)
-
-        # Loop through each account to comment on the submission
-        for account in Config.accounts:
-            proxy = get_working_proxy(account)
-
-            # Initialize RedditBot with or without proxy based on availability
-            if proxy is None:
-                print("[PROXY] - All proxies failed. Trying without proxy.")
-                reddit_bot = RedditBot(account)
-            else:
-                reddit_bot = RedditBot(account, proxy=proxy)
-
-            # Attempt to log in and comment with the account
-            if reddit_bot.login():
-                reddit_bot.generate_comment(submission, title, content, comments)
-                print(f"[ACCOUNT COMPLETE] - Commented on post '{title}' with account {account['username']}")
-                write_log(f"[ACCOUNT COMPLETE] - Commented on post '{title}' with account {account['username']}")
-            else:
-                print(f"[LOGIN FAILED] - Skipping account {account['username']} due to login failure.")
-                write_log(f"[LOGIN FAILED] - Skipping account {account['username']} due to login failure.")
-
-
 def get_working_proxy(account):
     for _ in range(len(Botconfig.proxies)):
         proxy = random.choice(Botconfig.proxies)
@@ -177,7 +149,27 @@ def main():
         write_log(f"[PROCESSING POST] - '{submission.title}'")
 
         # Process the single post for all accounts
-        reddit_instance.run_for_post(submission)
+        for account in Config.accounts:
+            proxy = get_working_proxy(account)
+
+            # Initialize RedditBot with or without proxy based on availability
+            if proxy is None:
+                print("[PROXY] - All proxies failed. Trying without proxy.")
+                reddit_bot = RedditBot(account)
+            else:
+                reddit_bot = RedditBot(account, proxy=proxy)
+
+            # Attempt to log in and comment with the account
+            if reddit_bot.login():
+                reddit_bot.generate_comment(submission, 
+                                            reddit_bot.extract_text_title(submission),
+                                            reddit_bot.extract_text_content(submission),
+                                            reddit_bot.extract_comment_content_and_upvotes(submission))
+                print(f"[ACCOUNT COMPLETE] - Commented on post '{submission.title}' with account {account['username']}")
+                write_log(f"[ACCOUNT COMPLETE] - Commented on post '{submission.title}' with account {account['username']}")
+            else:
+                print(f"[LOGIN FAILED] - Skipping account {account['username']} due to login failure.")
+                write_log(f"[LOGIN FAILED] - Skipping account {account['username']} due to login failure.")
 
         # Sleep after all accounts have commented on the current post
         print(f"[SLEEP] - Sleeping for {Botconfig.cooldown} seconds before moving to the next post.")
