@@ -1,90 +1,65 @@
+import time
 import g4f.Provider
 from g4f.client import Client
 import g4f
-import g4f.providers
-import requests
-import time
 
 def create_response(post):
-    
     try:
-        api_key = "vuBNqJtRhbu5ot6CgZXh" 
+        # Initialize g4f client with a RetryProvider
+        client = Client(
+            provider=g4f.Provider.RetryProvider([
+                g4f.Provider.Acytoo,
+                g4f.Provider.You,
+                g4f.Provider.Vercel,
+                g4f.Provider.PerplexityLabs,
+                g4f.Provider.H2o,
+                g4f.Provider.HuggingChat,
+                g4f.Provider.HuggingFace,
+                g4f.Provider.AiChatOnline,
+                g4f.Provider.DeepInfra,
+                g4f.Provider.Llama,
+                g4f.Provider.Liaobots,
+                g4f.Provider.MetaAI,
+                g4f.Provider.Hashnode,
+                g4f.Provider.ChatgptFree,
+            ])
+        )
 
-        request_payload = {
-            "key": api_key,
-            "prompt": post,
-            "model": "mistralai/mistral-7b-instruct-v0.1",
-        }
+        max_retries = 5  # Maximum number of retries
+        attempt = 0
 
-        response = requests.post("https://www.chipling.xyz/api/request", params=request_payload)
-        response_data = response.json()
+        while attempt < max_retries:
+            try:
+                # Generate chat completion using g4f
+                chat_completion = client.chat.completions.create(
+                    model=g4f.models.default,
+                    messages=[{"role": "user", "content": post}],
+                    stream=True
+                )
 
-        if "error" in response_data:
-            print(f"Error: {response_data['error']}")
-        else:
-            response_id = response_data
-            print(f"Response ID: {response_id}")
+                # Concatenate response chunks
+                response = ""
+                for completion in chat_completion:
+                    data = completion.choices[0].delta.content or ""
+                    response += data
 
-            while True:
-                response_payload = {"id": response_id}
-                response = requests.get("https://www.chipling.xyz/api/response", params=response_payload)
-                response_data = response.json()
+                # Remove enclosing quotes if present
+                if response.startswith('"') and response.endswith('"'):
+                    response = response[1:-1]
 
-                if response_data["status"] == "succeeded":
-                    output_url = response_data["output"]
-                    sentence = ""
-                    for i in output_url:
-                        sentence = sentence + i
-                    
-                    if (sentence.startswith('"') and sentence.endswith('"')) or \
-                        (sentence.startswith("'") and sentence.endswith("'")):
-                            # Remove the enclosing quotes
-                            cleaned_sentence = sentence[1:-1]
-                    else:
-                            # If the string doesn't start and end with quotes, keep it unchanged
-                            cleaned_sentence = sentence    
-                            
-                    return cleaned_sentence
+                return response
+
+            except Exception as e:
+                if "402" in str(e):  # Check if error 402 occurred
+                    attempt += 1
+                    print(f"Error 402 encountered. Retrying... ({attempt}/{max_retries})")
+                    time.sleep(2 ** attempt)  # Exponential backoff
                 else:
-                    print(f"API Request Status: {response_data['status']}")
-                    time.sleep(2) 
-    
-    except Exception as e:
-      client = Client(
-        provider=g4f.Provider.RetryProvider([
-            g4f.Provider.Acytoo,
-            g4f.Provider.You,
-            g4f.Provider.Vercel,
-            g4f.Provider.PerplexityLabs,
-            g4f.Provider.H2o,
-            g4f.Provider.HuggingChat,
-            g4f.Provider.HuggingFace,
-            g4f.Provider.AiChatOnline,
-            g4f.Provider.DeepInfra,
-            g4f.Provider.Llama,
-            g4f.Provider.Liaobots,
-            g4f.Provider.MetaAI,
-            g4f.Provider.Hashnode,
-            g4f.Provider.ChatgptFree,
-        ])
-    )
+                    raise e  # Re-raise other exceptions
 
-    chat_completion = client.chat.completions.create(
-        model=g4f.models.default,
-        messages=[{"role": "user", "content": post}],
-        stream=True
-    )
+        print("Max retries reached. Could not process the request.")
+        return None
 
-    response = ""
-
-    for completion in chat_completion:
-        data = completion.choices[0].delta.content or ""
-        response =  response + data
-
-    if response.startswith('"') and response.endswith('"'):
-        # Remove the enclosing quotes
-        response = response[1:-1]
-
-    return response
-    
-    
+    except Exception as final_error:
+        print(f"An unexpected error occurred: {final_error}")
+        return None
